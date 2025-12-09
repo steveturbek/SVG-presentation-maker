@@ -167,25 +167,19 @@
 
       <div class="info-box">
         <p><strong>How it works:</strong></p>
-        <p>1. Upload your <code>.md</code> file (slides separated by <code>---</code>)</p>
-        <p>2. Upload the <code>presentation-template.svg</code> file</p>
-        <p>3. (Optional) Select folder with images if your markdown references external SVG files</p>
-        <p>4. Click Generate to create your interactive presentation</p>
+        <p>Select a folder containing <code>presentation.md</code> and <code>presentation-template.svg</code> and any image files.</p>
+        <p>SVG files will be inlined and should animate.</p>
       </div>
 
       <div class="file-input-group">
-        <label for="mdFile">Markdown File (.md)</label>
-        <input type="file" id="mdFile" accept=".md" />
-      </div>
-
-      <div class="file-input-group">
-        <label for="svgFile">SVG Template File (.svg)</label>
-        <input type="file" id="svgFile" accept=".svg" />
-      </div>
-
-      <div class="file-input-group">
-        <label for="folderInput">Image Folder (Optional - for inlining external SVG images)</label>
+        <label for="folderInput">Select Presentation Folder</label>
         <input type="file" id="folderInput" webkitdirectory directory multiple />
+      </div>
+
+      <div id="fileStatus" class="info-box" style="display: none; background: #f0fff4; border-color: #68d391">
+        <p><strong>Files found:</strong></p>
+        <p id="mdStatus">Markdown: <span style="color: #c53030">Not found</span></p>
+        <p id="svgStatus">Template: <span style="color: #c53030">Not found</span></p>
       </div>
 
       <button id="generateBtn" onclick="generatePresentation()">Generate Presentation</button>
@@ -200,7 +194,10 @@
       if (fullscreenIcons.length > 0 && svg) {
         // Add click handler to each fullscreen icon
         fullscreenIcons.forEach((icon) => {
-          icon.addEventListener("click", function () {
+          icon.addEventListener("click", function (e) {
+            // Prevent the click from bubbling to the SVG's click handler
+            e.stopPropagation();
+
             if (!document.fullscreenElement) {
               // Enter fullscreen
               svg.requestFullscreen().catch((err) => {
@@ -282,6 +279,8 @@
 
     <script>
       let folderFiles = new Map(); // Store files by their relative path
+      let presentationMdFile = null;
+      let presentationSvgFile = null;
 
       function escapeHtml(text) {
         const div = document.createElement("div");
@@ -293,16 +292,46 @@
       document.getElementById("folderInput").addEventListener("change", (e) => {
         if (e.target.files.length > 0) {
           folderFiles.clear();
+          presentationMdFile = null;
+          presentationSvgFile = null;
 
           // Build a map of all files by their relative path
           for (let file of e.target.files) {
             const path = file.webkitRelativePath;
             // Remove the root folder name to get relative path
             const relativePath = path.substring(path.indexOf("/") + 1);
+            const fileName = relativePath.split("/").pop();
+
             folderFiles.set(relativePath, file);
+
+            // Check for presentation.md and presentation-template.svg
+            if (fileName === "presentation.md") {
+              presentationMdFile = file;
+            } else if (fileName === "presentation-template.svg") {
+              presentationSvgFile = file;
+            }
           }
 
           console.log(`Folder loaded: ${folderFiles.size} files found`);
+
+          // Update UI to show which files were found
+          const fileStatus = document.getElementById("fileStatus");
+          const mdStatus = document.getElementById("mdStatus");
+          const svgStatus = document.getElementById("svgStatus");
+
+          fileStatus.style.display = "block";
+
+          if (presentationMdFile) {
+            mdStatus.innerHTML = 'Markdown: <span style="color: #2f855a; font-weight: bold;">✓ presentation.md</span>';
+          } else {
+            mdStatus.innerHTML = 'Markdown: <span style="color: #c53030;">✗ presentation.md not found</span>';
+          }
+
+          if (presentationSvgFile) {
+            svgStatus.innerHTML = 'Template: <span style="color: #2f855a; font-weight: bold;">✓ presentation-template.svg</span>';
+          } else {
+            svgStatus.innerHTML = 'Template: <span style="color: #c53030;">✗ presentation-template.svg not found</span>';
+          }
         }
       });
 
@@ -640,14 +669,13 @@
       }
 
       async function generatePresentation() {
-        const mdInput = document.getElementById("mdFile");
-        const svgInput = document.getElementById("svgFile");
         const output = document.getElementById("output");
         const generateBtn = document.getElementById("generateBtn");
 
-        // Validation
-        if (!mdInput.files[0] || !svgInput.files[0]) {
-          output.innerHTML = '<div class="output error"><h3>Error</h3><p>Please select both a Markdown file and an SVG template file.</p></div>';
+        // Validation - check if files were found in the folder
+        if (!presentationMdFile || !presentationSvgFile) {
+          output.innerHTML =
+            '<div class="output error"><h3>Error</h3><p>Please select a folder containing both <code>presentation.md</code> and <code>presentation-template.svg</code> files.</p></div>';
           return;
         }
 
@@ -656,7 +684,7 @@
 
         try {
           // Read Markdown file
-          const mdText = await mdInput.files[0].text();
+          const mdText = await presentationMdFile.text();
 
           // Split into slides
           const slides = mdText.split(/\n---\n/).filter((slide) => slide.trim());
@@ -666,7 +694,7 @@
           }
 
           // Read SVG template
-          let svgTemplate = await svgInput.files[0].text();
+          let svgTemplate = await presentationSvgFile.text();
 
           // Parse template to extract positioning from both slide types
           const templateParser = new DOMParser();
@@ -785,11 +813,11 @@
           if (scriptElement) {
             const scriptContent = scriptElement.textContent.trim();
             // Build script tag with CDATA (using concatenation to avoid parser issues)
-            const cdataOpen = '<![CDATA[';
-            const cdataClose = ']]>';
-            const scriptOpen = '<' + 'script type="text/javascript">\n';
-            const scriptClose = '</' + 'script>';
-            const scriptTag = scriptOpen + cdataOpen + '\n(function() {\n' + scriptContent + '\n})();\n' + cdataClose + '\n' + scriptClose;
+            const cdataOpen = "<![CDATA[";
+            const cdataClose = "]]>";
+            const scriptOpen = "<" + 'script type="text/javascript">\n';
+            const scriptClose = "</" + "script>";
+            const scriptTag = scriptOpen + cdataOpen + "\n(function() {\n" + scriptContent + "\n})();\n" + cdataClose + "\n" + scriptClose;
             // Insert script before closing </svg> tag
             finalSvg = finalSvg.replace("</svg>", scriptTag + "\n</svg>");
           }
@@ -810,8 +838,7 @@
                         <h3>Success!</h3>
                         <p>Generated ${slides.length} slides. Your presentation has been downloaded as <code>presentation.svg</code></p>
                         ${imageMessage}
-                        <p>Open the file in a web browser to view your interactive presentation. Use arrow keys or click left/right to navigate.</p>
-                    </div>
+                        </div>
                 `;
         } catch (error) {
           output.innerHTML = `
@@ -825,48 +852,36 @@
         }
       }
 
-      // Enable drag and drop
-      ["mdFile", "svgFile"].forEach((id) => {
-        const input = document.getElementById(id);
-        const parent = input.parentElement;
+      // Enable drag and drop for folder input
+      const folderInput = document.getElementById("folderInput");
+      const parent = folderInput.parentElement;
 
-        ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-          parent.addEventListener(eventName, preventDefaults, false);
-        });
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        parent.addEventListener(eventName, preventDefaults, false);
+      });
 
-        function preventDefaults(e) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
-        ["dragenter", "dragover"].forEach((eventName) => {
-          parent.addEventListener(
-            eventName,
-            () => {
-              input.style.borderColor = "#764ba2";
-              input.style.background = "#f0f1ff";
-            },
-            false
-          );
-        });
-
-        ["dragleave", "drop"].forEach((eventName) => {
-          parent.addEventListener(
-            eventName,
-            () => {
-              input.style.borderColor = "#667eea";
-              input.style.background = "#f8f9ff";
-            },
-            false
-          );
-        });
-
+      ["dragenter", "dragover"].forEach((eventName) => {
         parent.addEventListener(
-          "drop",
-          (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            input.files = files;
+          eventName,
+          () => {
+            folderInput.style.borderColor = "#764ba2";
+            folderInput.style.background = "#f0f1ff";
+          },
+          false
+        );
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        parent.addEventListener(
+          eventName,
+          () => {
+            folderInput.style.borderColor = "#667eea";
+            folderInput.style.background = "#f8f9ff";
           },
           false
         );
