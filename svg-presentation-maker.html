@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SVG Presentation Maker</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 800px;
+        width: 100%;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 1.1em;
+      }
+
+      .file-input-group {
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+        font-size: 1.1em;
+      }
+
+      input[type="file"] {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: 2px dashed #667eea;
+        border-radius: 10px;
+        background: #f8f9ff;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      input[type="file"]:hover {
+        border-color: #764ba2;
+        background: #f0f1ff;
+      }
+
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.1em;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .output {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9ff;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .output h3 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .output p {
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .error {
+        background: #fff5f5;
+        border-left-color: #e53e3e;
+        color: #c53030;
+      }
+
+      .success {
+        background: #f0fff4;
+        border-left-color: #38a169;
+        color: #2f855a;
+      }
+
+      code {
+        background: #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9em;
+      }
+
+      .info-box {
+        background: #ebf8ff;
+        border: 1px solid #90cdf4;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 25px;
+      }
+
+      .info-box p {
+        color: #2c5282;
+        line-height: 1.5;
+        margin-bottom: 8px;
+      }
+
+      .info-box p:last-child {
+        margin-bottom: 0;
+      }
+
+      .info-box strong {
+        color: #1a365d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>SVG Presentation Maker</h1>
+      <p class="subtitle">Convert Markdown presentations into interactive SVG slideshows</p>
+
+      <div class="info-box">
+        <p><strong>How it works:</strong></p>
+        <p>1. Upload your <code>.md</code> file (slides separated by <code>---</code>)</p>
+        <p>2. Upload the <code>presentation-template.svg</code> file</p>
+        <p>3. (Optional) Select folder with images if your markdown references external SVG files</p>
+        <p>4. Click Generate to create your interactive presentation</p>
+      </div>
+
+      <div class="file-input-group">
+        <label for="mdFile">Markdown File (.md)</label>
+        <input type="file" id="mdFile" accept=".md" />
+      </div>
+
+      <div class="file-input-group">
+        <label for="svgFile">SVG Template File (.svg)</label>
+        <input type="file" id="svgFile" accept=".svg" />
+      </div>
+
+      <div class="file-input-group">
+        <label for="folderInput">Image Folder (Optional - for inlining external SVG images)</label>
+        <input type="file" id="folderInput" webkitdirectory directory multiple />
+      </div>
+
+      <button id="generateBtn" onclick="generatePresentation()">Generate Presentation</button>
+
+      <div id="output"></div>
+    </div>
+
+    <script type="text/javascript" id="slide-presentation-javascript" style="display: none">
+      const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
+      const svg = document.querySelector("svg");
+
+      if (fullscreenIcons.length > 0 && svg) {
+        // Add click handler to each fullscreen icon
+        fullscreenIcons.forEach((icon) => {
+          icon.addEventListener("click", function () {
+            if (!document.fullscreenElement) {
+              // Enter fullscreen
+              svg.requestFullscreen().catch((err) => {
+                console.error("Error attempting to enable fullscreen:", err);
+              });
+            } else {
+              // Exit fullscreen
+              document.exitFullscreen();
+            }
+          });
+        });
+
+        // Show/hide buttons based on fullscreen state
+        document.addEventListener("fullscreenchange", function () {
+          fullscreenIcons.forEach((icon) => {
+            if (document.fullscreenElement) {
+              icon.style.visibility = "hidden";
+            } else {
+              icon.style.visibility = "visible";
+            }
+          });
+        });
+      }
+
+      // Helper function to navigate slides
+      function navigateSlides(direction) {
+        const slides = document.querySelectorAll(".slides > .slide, .slides > .title");
+
+        // Find currently visible slide by checking computed style
+        let currentIndex = -1;
+        for (let i = 0; i < slides.length; i++) {
+          if (window.getComputedStyle(slides[i]).display === "block") {
+            currentIndex = i;
+            break;
+          }
+        }
+
+        let nextIndex = currentIndex;
+
+        if (direction === "next" && currentIndex < slides.length - 1) {
+          nextIndex = currentIndex + 1;
+        } else if (direction === "prev" && currentIndex > 0) {
+          nextIndex = currentIndex - 1;
+        }
+
+        // Switch slides if index changed
+        if (nextIndex !== currentIndex && nextIndex >= 0) {
+          slides[currentIndex].style.display = "none";
+          slides[nextIndex].style.display = "block";
+        }
+      }
+
+      // Keyboard navigation for slides
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown") {
+          navigateSlides("next");
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") {
+          navigateSlides("prev");
+        }
+      });
+
+      // Touch navigation for mobile
+      if (svg) {
+        svg.addEventListener("click", function (e) {
+          const svgRect = svg.getBoundingClientRect();
+          const clickX = e.clientX - svgRect.left;
+          const svgWidth = svgRect.width;
+          const leftThird = svgWidth / 3;
+          const rightThird = (svgWidth * 2) / 3;
+
+          if (clickX < leftThird) {
+            navigateSlides("prev");
+          } else if (clickX > rightThird) {
+            navigateSlides("next");
+          }
+        });
+      }
+    </script>
+
+    <script>
+      let folderFiles = new Map(); // Store files by their relative path
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Handle folder input
+      document.getElementById("folderInput").addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+          folderFiles.clear();
+
+          // Build a map of all files by their relative path
+          for (let file of e.target.files) {
+            const path = file.webkitRelativePath;
+            // Remove the root folder name to get relative path
+            const relativePath = path.substring(path.indexOf("/") + 1);
+            folderFiles.set(relativePath, file);
+          }
+
+          console.log(`Folder loaded: ${folderFiles.size} files found`);
+        }
+      });
+
+      // Parse markdown formatting (bold ** and italic _) into styled segments
+      function parseMarkdownFormatting(text) {
+        const segments = [];
+        let currentPos = 0;
+
+        // Regex to match **bold** or _italic_ or __italic__
+        const regex = /(\*\*(.+?)\*\*)|(_(.+?)_)|(__(.+?)__)/g;
+        let match;
+
+        while ((match = regex.exec(text)) !== null) {
+          // Add text before the match
+          if (match.index > currentPos) {
+            segments.push({
+              text: text.substring(currentPos, match.index),
+              style: "normal",
+            });
+          }
+
+          // Add the formatted text
+          if (match[1]) {
+            // **bold**
+            segments.push({
+              text: match[2],
+              style: "bold",
+            });
+          } else if (match[3]) {
+            // _italic_
+            segments.push({
+              text: match[4],
+              style: "italic",
+            });
+          } else if (match[5]) {
+            // __italic__
+            segments.push({
+              text: match[6],
+              style: "italic",
+            });
+          }
+
+          currentPos = match.index + match[0].length;
+        }
+
+        // Add remaining text
+        if (currentPos < text.length) {
+          segments.push({
+            text: text.substring(currentPos),
+            style: "normal",
+          });
+        }
+
+        return segments.length > 0 ? segments : [{ text: text, style: "normal" }];
+      }
+
+      function parseMarkdownSlide(slideText) {
+        const lines = slideText.trim().split("\n");
+        const elements = [];
+        let yPosition = 20;
+        const lineHeight = 10;
+        let slideType = "slide"; // default to "slide"
+
+        // Check if this is a title slide (starts with # but not ##)
+        const firstLine = lines[0]?.trim();
+        if (firstLine && firstLine.startsWith("# ") && !firstLine.startsWith("## ")) {
+          slideType = "title";
+        }
+
+        for (let line of lines) {
+          line = line.trim();
+          if (!line) {
+            yPosition += lineHeight * 0.5; // Half spacing for empty lines
+            continue;
+          }
+
+          // Check for <image> tag
+          if (line.startsWith("<image ")) {
+            elements.push({
+              type: "image",
+              rawTag: line,
+              y: yPosition,
+            });
+            yPosition += lineHeight * 2; // Add some space after image
+            continue;
+          }
+
+          // Title (# or ##)
+          if (line.startsWith("## ")) {
+            const text = line.substring(3);
+            elements.push({
+              type: "title",
+              text: text,
+              segments: parseMarkdownFormatting(text),
+              y: yPosition,
+            });
+            yPosition += lineHeight * 1.5;
+          } else if (line.startsWith("# ")) {
+            const text = line.substring(2);
+            elements.push({
+              type: "title",
+              text: text,
+              segments: parseMarkdownFormatting(text),
+              y: yPosition,
+            });
+            yPosition += lineHeight * 1.5;
+          }
+          // Bullet points
+          else if (line.startsWith("- ")) {
+            const text = line.substring(2);
+            elements.push({
+              type: "subtext",
+              text: text,
+              segments: parseMarkdownFormatting(text),
+              y: yPosition,
+              indent: 12,
+            });
+            yPosition += lineHeight;
+          }
+          // Code blocks
+          else if (line.startsWith("```")) {
+            // Skip code block markers for now
+            continue;
+          }
+          // Regular text
+          else {
+            const text = line;
+            elements.push({
+              type: "subtext",
+              text: text,
+              segments: parseMarkdownFormatting(text),
+              y: yPosition,
+            });
+            yPosition += lineHeight;
+          }
+        }
+
+        return { elements, slideType };
+      }
+
+      function createStyledTspan(segment, className, xPos, isFirst = false) {
+        const escapedText = escapeHtml(segment.text);
+        let fontWeight = "";
+        let fontStyle = "";
+
+        if (segment.style === "bold") {
+          fontWeight = ' font-weight="bold"';
+        } else if (segment.style === "italic") {
+          fontStyle = ' font-style="italic"';
+        }
+
+        return `<tspan class="${className}" x="${xPos}" dy="${isFirst ? "0" : "0"}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
+      }
+
+      // Function to inline external SVG images
+      async function inlineExternalImages(svgDoc) {
+        const parser = new DOMParser();
+        const imageElements = svgDoc.querySelectorAll("image");
+
+        if (imageElements.length === 0) {
+          return 0; // No images to process
+        }
+
+        let inlinedCount = 0;
+
+        for (let img of imageElements) {
+          const href = img.getAttribute("href") || img.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+
+          if (!href) continue;
+
+          // Check if it's an SVG file
+          if (!href.toLowerCase().endsWith(".svg")) {
+            console.log(`Skipping non-SVG image: ${href}`);
+            continue; // Keep PNG/JPG as-is
+          }
+
+          try {
+            // Normalize the path (remove ../ and resolve)
+            const normalizedPath = href.replace(/^\.\.\//, "");
+
+            // Try to find the file in the loaded folder
+            let externalFile = folderFiles.get(normalizedPath);
+
+            if (!externalFile) {
+              console.warn(`SVG file not found in folder: ${href}`);
+              continue; // Keep the original <image> tag
+            }
+
+            const externalSVGText = await externalFile.text();
+            const externalDoc = parser.parseFromString(externalSVGText, "image/svg+xml");
+            const externalSVG = externalDoc.documentElement;
+
+            // Create a group element to wrap the external SVG content
+            const group = svgDoc.createElementNS("http://www.w3.org/2000/svg", "g");
+
+            // Copy attributes from image element for positioning
+            const x = parseFloat(img.getAttribute("x") || 0);
+            const y = parseFloat(img.getAttribute("y") || 0);
+            const width = img.getAttribute("width");
+            const height = img.getAttribute("height");
+
+            // Apply transform for positioning
+            if (x !== 0 || y !== 0) {
+              group.setAttribute("transform", `translate(${x}, ${y})`);
+            }
+
+            // Copy viewBox from external SVG if it exists
+            const viewBox = externalSVG.getAttribute("viewBox");
+            if (viewBox && width && height) {
+              // Add viewBox info as comment
+              const comment = svgDoc.createComment(` Inlined from ${href}, original viewBox: ${viewBox} `);
+              group.appendChild(comment);
+            }
+
+            // Copy all child elements from external SVG
+            const children = Array.from(externalSVG.children);
+            children.forEach((child) => {
+              const imported = svgDoc.importNode(child, true);
+              group.appendChild(imported);
+            });
+
+            // Replace image element with group
+            img.parentNode.replaceChild(group, img);
+
+            console.log(`Successfully inlined: ${href}`);
+            inlinedCount++;
+          } catch (err) {
+            console.error(`Error inlining ${href}:`, err);
+            // Keep the original <image> tag on error
+          }
+        }
+
+        return inlinedCount;
+      }
+
+      function createSvgSlide(slideElements, isFirst = false, templatePositions = null, slideType = "slide") {
+        let svgContent = `    <g class="${slideType}"${isFirst ? "" : ""}>\n`;
+
+        // Use template positions or fallback to defaults
+        const positions = templatePositions || {
+          titleX: "10%",
+          titleY: "20%",
+          subtextX: "10%",
+          subtextStartY: "30%",
+          subtextLineHeight: 10,
+        };
+
+        // Track current Y position for subtext
+        let currentSubtextY = parseFloat(positions.subtextStartY);
+
+        for (const element of slideElements) {
+          // Handle image elements - mark for later processing
+          if (element.type === "image") {
+            svgContent += `        ${element.rawTag}\n`;
+            continue;
+          }
+
+          const className = element.type === "title" ? "heading" : "subtext";
+
+          let xPos, yPos;
+          if (element.type === "title") {
+            xPos = positions.titleX;
+            yPos = positions.titleY;
+          } else {
+            xPos = element.indent ? `${parseFloat(positions.subtextX) + 2}%` : positions.subtextX;
+            yPos = `${currentSubtextY}%`;
+            currentSubtextY += positions.subtextLineHeight;
+          }
+
+          // Handle long text by wrapping with tspan and dy
+          const maxChars = element.type === "title" ? 50 : 70;
+          if (element.text.length > maxChars) {
+            // Simple word wrap using tspan - need to handle segments
+            const words = element.text.split(" ");
+            let currentLine = "";
+            const lines = [];
+
+            for (const word of words) {
+              const testLine = currentLine ? `${currentLine} ${word}` : word;
+              if (testLine.length > maxChars && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            }
+            if (currentLine) {
+              lines.push(currentLine);
+            }
+
+            // Create text element with tspan children
+            svgContent += `        <text x="${xPos}" y="${yPos}">\n`;
+            lines.forEach((line, lineIndex) => {
+              // Parse each line for formatting
+              const lineSegments = parseMarkdownFormatting(line);
+              lineSegments.forEach((seg, segIndex) => {
+                // First segment of each line needs proper dy, rest need dy="0"
+                const isFirstSegmentOfLine = segIndex === 0;
+                const dy = isFirstSegmentOfLine ? (lineIndex === 0 ? "0" : "1.2em") : "0";
+
+                const escapedText = escapeHtml(seg.text);
+                let fontWeight = seg.style === "bold" ? ' font-weight="bold"' : "";
+                let fontStyle = seg.style === "italic" ? ' font-style="italic"' : "";
+                const xAttr = isFirstSegmentOfLine ? xPos : "";
+
+                svgContent += `          <tspan class="${className}" x="${xAttr}" dy="${dy}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
+                if (segIndex === lineSegments.length - 1) svgContent += "\n";
+              });
+            });
+            svgContent += `        </text>\n`;
+
+            // Adjust Y position for wrapped lines
+            if (element.type === "subtext") {
+              currentSubtextY += (lines.length - 1) * (positions.subtextLineHeight * 0.5);
+            }
+          } else {
+            // Single line with formatted segments
+            svgContent += `        <text x="${xPos}" y="${yPos}">\n`;
+            element.segments.forEach((segment, index) => {
+              const tspan = createStyledTspan(segment, className, index === 0 ? xPos : "", index === 0);
+              svgContent += `          ${tspan}`;
+              if (index === element.segments.length - 1) svgContent += "\n";
+            });
+            svgContent += `        </text>\n`;
+          }
+        }
+
+        // Add fullscreen icon only to first slide
+        if (isFirst) {
+          svgContent += `<text class="fullscreen-icon" style="cursor: pointer;" x="95%" y="5%" font-size="40" fill="white" text-anchor="middle">⛶</text>\n`;
+        }
+
+        svgContent += `    </g>\n`;
+        return svgContent;
+      }
+
+      async function generatePresentation() {
+        const mdInput = document.getElementById("mdFile");
+        const svgInput = document.getElementById("svgFile");
+        const output = document.getElementById("output");
+        const generateBtn = document.getElementById("generateBtn");
+
+        // Validation
+        if (!mdInput.files[0] || !svgInput.files[0]) {
+          output.innerHTML = '<div class="output error"><h3>Error</h3><p>Please select both a Markdown file and an SVG template file.</p></div>';
+          return;
+        }
+
+        generateBtn.disabled = true;
+        output.innerHTML = '<div class="output"><h3>Processing...</h3><p>Generating your presentation...</p></div>';
+
+        try {
+          // Read Markdown file
+          const mdText = await mdInput.files[0].text();
+
+          // Split into slides
+          const slides = mdText.split(/\n---\n/).filter((slide) => slide.trim());
+
+          if (slides.length === 0) {
+            throw new Error("No slides found in markdown file. Make sure slides are separated by ---");
+          }
+
+          // Read SVG template
+          let svgTemplate = await svgInput.files[0].text();
+
+          // Parse template to extract positioning from both slide types
+          const templateParser = new DOMParser();
+          const templateDoc = templateParser.parseFromString(svgTemplate, "image/svg+xml");
+
+          // Extract positioning for both title and slide types
+          const titleSlide = templateDoc.querySelector("g.slides > g.title");
+          const contentSlide = templateDoc.querySelector("g.slides > g.slide");
+
+          // Default positions
+          let titlePositions = {
+            titleX: "10%",
+            titleY: "20%",
+            subtextX: "10%",
+            subtextStartY: "30%",
+            subtextLineHeight: 10,
+          };
+
+          let slidePositions = {
+            titleX: "10%",
+            titleY: "20%",
+            subtextX: "10%",
+            subtextStartY: "30%",
+            subtextLineHeight: 10,
+          };
+
+          // Extract title slide positions
+          if (titleSlide) {
+            const headingText = titleSlide.querySelector("text.heading");
+            const subtextTexts = titleSlide.querySelectorAll("text.subtext");
+
+            if (headingText) {
+              titlePositions.titleX = headingText.getAttribute("x") || "10%";
+              titlePositions.titleY = headingText.getAttribute("y") || "20%";
+            }
+
+            if (subtextTexts.length > 0) {
+              titlePositions.subtextX = subtextTexts[0].getAttribute("x") || "10%";
+              titlePositions.subtextStartY = subtextTexts[0].getAttribute("y") || "30%";
+
+              if (subtextTexts.length > 1) {
+                const y1 = parseFloat(subtextTexts[0].getAttribute("y"));
+                const y2 = parseFloat(subtextTexts[1].getAttribute("y"));
+                if (!isNaN(y1) && !isNaN(y2)) {
+                  titlePositions.subtextLineHeight = y2 - y1;
+                }
+              }
+            }
+          }
+
+          // Extract content slide positions
+          if (contentSlide) {
+            const headingText = contentSlide.querySelector("text.heading");
+            const subtextTexts = contentSlide.querySelectorAll("text.subtext");
+
+            if (headingText) {
+              slidePositions.titleX = headingText.getAttribute("x") || "10%";
+              slidePositions.titleY = headingText.getAttribute("y") || "20%";
+            }
+
+            if (subtextTexts.length > 0) {
+              slidePositions.subtextX = subtextTexts[0].getAttribute("x") || "10%";
+              slidePositions.subtextStartY = subtextTexts[0].getAttribute("y") || "30%";
+
+              if (subtextTexts.length > 1) {
+                const y1 = parseFloat(subtextTexts[0].getAttribute("y"));
+                const y2 = parseFloat(subtextTexts[1].getAttribute("y"));
+                if (!isNaN(y1) && !isNaN(y2)) {
+                  slidePositions.subtextLineHeight = y2 - y1;
+                }
+              }
+            }
+          }
+
+          // Generate SVG slides using template positions
+          let allSlides = "";
+          slides.forEach((slideText, index) => {
+            const { elements, slideType } = parseMarkdownSlide(slideText);
+            const positions = slideType === "title" ? titlePositions : slidePositions;
+            allSlides += createSvgSlide(elements, index === 0, positions, slideType);
+          });
+
+          // Find the <g class="slides"> section and replace its contents
+          // Use DOM parser to properly handle nested tags
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgTemplate, "image/svg+xml");
+          const slidesGroup = svgDoc.querySelector("g.slides");
+
+          if (!slidesGroup) {
+            throw new Error('Could not find <g class="slides"> in template');
+          }
+
+          // Clear existing content
+          slidesGroup.innerHTML = "";
+
+          // Parse and add new slides - use SVG namespace
+          const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          tempSvg.innerHTML = allSlides;
+          Array.from(tempSvg.children).forEach((child) => {
+            slidesGroup.appendChild(child);
+          });
+
+          // Inline external SVG images if folder was provided
+          let inlinedCount = 0;
+          if (folderFiles.size > 0) {
+            output.innerHTML = '<div class="output"><h3>Processing...</h3><p>Inlining external SVG images...</p></div>';
+            inlinedCount = await inlineExternalImages(svgDoc);
+          }
+
+          // Serialize to string first
+          const serializer = new XMLSerializer();
+          let finalSvg = serializer.serializeToString(svgDoc);
+
+          // Add the interactive script to the SVG as a string (to avoid escaping issues)
+          const scriptElement = document.getElementById("slide-presentation-javascript");
+          if (scriptElement) {
+            const scriptContent = scriptElement.textContent.trim();
+            // Build script tag with CDATA (using concatenation to avoid parser issues)
+            const cdataOpen = '<![CDATA[';
+            const cdataClose = ']]>';
+            const scriptOpen = '<' + 'script type="text/javascript">\n';
+            const scriptClose = '</' + 'script>';
+            const scriptTag = scriptOpen + cdataOpen + '\n(function() {\n' + scriptContent + '\n})();\n' + cdataClose + '\n' + scriptClose;
+            // Insert script before closing </svg> tag
+            finalSvg = finalSvg.replace("</svg>", scriptTag + "\n</svg>");
+          }
+
+          // Create download
+          const blob = new Blob([finalSvg], { type: "image/svg+xml" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "presentation.svg";
+          a.click();
+          URL.revokeObjectURL(url);
+
+          const imageMessage = inlinedCount > 0 ? `<p>Inlined ${inlinedCount} external SVG image(s).</p>` : "";
+
+          output.innerHTML = `
+                    <div class="output success">
+                        <h3>Success!</h3>
+                        <p>Generated ${slides.length} slides. Your presentation has been downloaded as <code>presentation.svg</code></p>
+                        ${imageMessage}
+                        <p>Open the file in a web browser to view your interactive presentation. Use arrow keys or click left/right to navigate.</p>
+                    </div>
+                `;
+        } catch (error) {
+          output.innerHTML = `
+                    <div class="output error">
+                        <h3>Error</h3>
+                        <p>${escapeHtml(error.message)}</p>
+                    </div>
+                `;
+        } finally {
+          generateBtn.disabled = false;
+        }
+      }
+
+      // Enable drag and drop
+      ["mdFile", "svgFile"].forEach((id) => {
+        const input = document.getElementById(id);
+        const parent = input.parentElement;
+
+        ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+          parent.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+
+        ["dragenter", "dragover"].forEach((eventName) => {
+          parent.addEventListener(
+            eventName,
+            () => {
+              input.style.borderColor = "#764ba2";
+              input.style.background = "#f0f1ff";
+            },
+            false
+          );
+        });
+
+        ["dragleave", "drop"].forEach((eventName) => {
+          parent.addEventListener(
+            eventName,
+            () => {
+              input.style.borderColor = "#667eea";
+              input.style.background = "#f8f9ff";
+            },
+            false
+          );
+        });
+
+        parent.addEventListener(
+          "drop",
+          (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            input.files = files;
+          },
+          false
+        );
+      });
+    </script>
+  </body>
+</html>
