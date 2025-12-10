@@ -335,13 +335,14 @@
         }
       });
 
-      // Parse markdown formatting (bold ** and italic _) into styled segments
+      // Parse markdown formatting (bold ** and italic _ and inline code `) into styled segments
       function parseMarkdownFormatting(text) {
         const segments = [];
         let currentPos = 0;
 
-        // Regex to match **bold** or _italic_ or __italic__
-        const regex = /(\*\*(.+?)\*\*)|(_(.+?)_)|(__(.+?)__)/g;
+        // Regex to match `code` or **bold** or _italic_ or __italic__
+        // Order matters: code should be matched first to avoid treating backticks inside code as formatting
+        const regex = /(`([^`]+)`)|(\*\*(.+?)\*\*)|(_(.+?)_)|(__(.+?)__)/g;
         let match;
 
         while ((match = regex.exec(text)) !== null) {
@@ -355,21 +356,27 @@
 
           // Add the formatted text
           if (match[1]) {
-            // **bold**
+            // `code`
             segments.push({
               text: match[2],
-              style: "bold",
+              style: "code",
             });
           } else if (match[3]) {
-            // _italic_
+            // **bold**
             segments.push({
               text: match[4],
-              style: "italic",
+              style: "bold",
             });
           } else if (match[5]) {
-            // __italic__
+            // _italic_
             segments.push({
               text: match[6],
+              style: "italic",
+            });
+          } else if (match[7]) {
+            // __italic__
+            segments.push({
+              text: match[8],
               style: "italic",
             });
           }
@@ -394,6 +401,8 @@
         let yPosition = 20;
         const lineHeight = 10;
         let slideType = "slide"; // default to "slide"
+        let inCodeBlock = false;
+        let codeBlockLines = [];
 
         // Check if this is a title slide (starts with # but not ##)
         const firstLine = lines[0]?.trim();
@@ -401,8 +410,42 @@
           slideType = "title";
         }
 
-        for (let line of lines) {
-          line = line.trim();
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i].trim();
+
+          // Handle code block markers
+          if (line.startsWith("```")) {
+            if (!inCodeBlock) {
+              // Starting a code block
+              inCodeBlock = true;
+              codeBlockLines = [];
+            } else {
+              // Ending a code block - add all collected lines as code elements
+              for (let codeLine of codeBlockLines) {
+                // Remove any backticks from code lines (they're already in a code block)
+                const cleanedLine = codeLine.replace(/^`|`$/g, "");
+                elements.push({
+                  type: "code",
+                  text: cleanedLine,
+                  segments: [{ text: cleanedLine, style: "code" }],
+                  y: yPosition,
+                  indent: 6,
+                });
+                yPosition += lineHeight * 0.9; // Slightly tighter spacing for code
+              }
+              inCodeBlock = false;
+              codeBlockLines = [];
+              yPosition += lineHeight; // Add space after code block (increased from 0.5)
+            }
+            continue;
+          }
+
+          // If we're in a code block, collect the line
+          if (inCodeBlock) {
+            codeBlockLines.push(line);
+            continue;
+          }
+
           if (!line) {
             yPosition += lineHeight * 0.5; // Half spacing for empty lines
             continue;
@@ -447,14 +490,9 @@
               text: text,
               segments: parseMarkdownFormatting(text),
               y: yPosition,
-              indent: 12,
+              indent: 0, // No indent - bullets align with regular text
             });
             yPosition += lineHeight;
-          }
-          // Code blocks
-          else if (line.startsWith("```")) {
-            // Skip code block markers for now
-            continue;
           }
           // Regular text
           else {
@@ -476,14 +514,17 @@
         const escapedText = escapeHtml(segment.text);
         let fontWeight = "";
         let fontStyle = "";
+        let extraClass = "";
 
         if (segment.style === "bold") {
           fontWeight = ' font-weight="bold"';
         } else if (segment.style === "italic") {
           fontStyle = ' font-style="italic"';
+        } else if (segment.style === "code") {
+          extraClass = ' code';
         }
 
-        return `<tspan class="${className}" x="${xPos}" dy="${isFirst ? "0" : "0"}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
+        return `<tspan class="${className}${extraClass}" x="${xPos}" dy="${isFirst ? "0" : "0"}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
       }
 
       // Function to inline external SVG images
@@ -596,13 +637,15 @@
             xPos = positions.titleX;
             yPos = positions.titleY;
           } else {
-            xPos = element.indent ? `${parseFloat(positions.subtextX) + 2}%` : positions.subtextX;
+            // Handle code elements with indent
+            const baseIndent = element.type === "code" ? element.indent || 6 : element.indent || 0;
+            xPos = baseIndent > 0 ? `${parseFloat(positions.subtextX) + baseIndent}%` : positions.subtextX;
             yPos = `${currentSubtextY}%`;
             currentSubtextY += positions.subtextLineHeight;
           }
 
           // Handle long text by wrapping with tspan and dy
-          const maxChars = element.type === "title" ? 50 : 70;
+          const maxChars = element.type === "title" ? 47 : element.type === "code" ? 80 : 60;
           if (element.text.length > maxChars) {
             // Simple word wrap using tspan - need to handle segments
             const words = element.text.split(" ");
@@ -625,8 +668,8 @@
             // Create text element with tspan children
             svgContent += `        <text x="${xPos}" y="${yPos}">\n`;
             lines.forEach((line, lineIndex) => {
-              // Parse each line for formatting
-              const lineSegments = parseMarkdownFormatting(line);
+              // For code elements, use pre-set segments; for others, parse formatting
+              const lineSegments = element.type === "code" ? [{ text: line, style: "code" }] : parseMarkdownFormatting(line);
               lineSegments.forEach((seg, segIndex) => {
                 // First segment of each line needs proper dy, rest need dy="0"
                 const isFirstSegmentOfLine = segIndex === 0;
@@ -635,9 +678,10 @@
                 const escapedText = escapeHtml(seg.text);
                 let fontWeight = seg.style === "bold" ? ' font-weight="bold"' : "";
                 let fontStyle = seg.style === "italic" ? ' font-style="italic"' : "";
+                let extraClass = seg.style === "code" ? ' code' : "";
                 const xAttr = isFirstSegmentOfLine ? xPos : "";
 
-                svgContent += `          <tspan class="${className}" x="${xAttr}" dy="${dy}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
+                svgContent += `          <tspan class="${className}${extraClass}" x="${xAttr}" dy="${dy}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
                 if (segIndex === lineSegments.length - 1) svgContent += "\n";
               });
             });
