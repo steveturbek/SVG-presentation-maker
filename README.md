@@ -1,15 +1,26 @@
 # SVG-presentation-maker
 
-This tool makes a powerpoint-style presentation using a SVG image from a markdown template
+A HTML/JavaScript page that makes powerpoint-style presentations in SVG file.
 
+This is a Proof of Concept, many many features needed before this is a real product.
+
+[Try it out](svg-presentation-maker.html)
+
+- You need the `presentation-template.svg` and `presentation.md` (download the repo for samples)
+
+## Features
+
+- Write slide content in markdown template
+- Design your template in a design tool like Figma/ Illustrator / TextEdit / VSCode
 - No software needed, just chrome.
-- it embeds other SVGs, so they animate in the presentation, can even be interactive
-- image files are linked, not included
+- SVGs are embedded, so they animate in the presentation, can even be interactive
+- Image files are linked, not included
 
 ## Why??
 
 - Was made for a presentation about how powerful and flexible SVGs are.
 - Procrastination!
+- File is tiny! [see example](files/presentation-output.svg)
 
 ## Notes
 
