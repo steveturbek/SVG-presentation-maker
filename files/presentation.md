@@ -103,7 +103,7 @@ Keep your markdown and SVG files in the files directory
 - **Infinite scalability** - SVG graphics never pixelate
 - **Small file sizes** - Vector graphics are compact
 - **Interactive potential** - SVGs can include animations and interactivity
-- **Portable** - Single HTML file can contain everything
+- **Portable** - Single SVG file can contain text and SVGs
 - **Designer-friendly** - Create graphics in Figma or Illustrator
 
 ---
@@ -112,19 +112,10 @@ Keep your markdown and SVG files in the files directory
 
 1. Edit `presentation.md` with your content
 2. Add any SVG graphics to the `files` directory
-3. Open `index.html` in your browser
-4. Start presenting!
-
----
-
-## Customization
-
-The tool is designed to be simple and hackable:
-
-- Modify styles in the HTML file
-- Adjust slide transitions
-- Add custom JavaScript for interactivity
-- Integrate with the SVG AI Helper workflow
+3. Experiment with different layouts and SVG graphics.
+4. Use the tool to generate your `presentation.svg`
+5. Open in your browser
+6. Present!
 
 ---
 
@@ -143,13 +134,3 @@ The tool is designed to be simple and hackable:
 This tool is open source and free to use.
 
 Modify it, extend it, make it your own.
-
----
-
-## Questions?
-
-Start by editing this file (`presentation.md`) with your own content.
-
-Experiment with different layouts and SVG graphics.
-
-Have fun presenting!

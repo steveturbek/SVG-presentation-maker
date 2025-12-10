@@ -226,10 +226,10 @@
       function navigateSlides(direction) {
         const slides = document.querySelectorAll(".slides > .slide, .slides > .title");
 
-        // Find currently visible slide by checking computed style
+        // Find currently visible slide
         let currentIndex = -1;
         for (let i = 0; i < slides.length; i++) {
-          if (window.getComputedStyle(slides[i]).display === "block") {
+          if (slides[i].classList.contains("active")) {
             currentIndex = i;
             break;
           }
@@ -245,8 +245,8 @@
 
         // Switch slides if index changed
         if (nextIndex !== currentIndex && nextIndex >= 0) {
-          slides[currentIndex].style.display = "none";
-          slides[nextIndex].style.display = "block";
+          slides[currentIndex].classList.remove("active");
+          slides[nextIndex].classList.add("active");
         }
       }
 
@@ -485,10 +485,11 @@
           // Bullet points
           else if (line.startsWith("- ")) {
             const text = line.substring(2);
+            const textWithBullet = "• " + text;
             elements.push({
               type: "subtext",
-              text: text,
-              segments: parseMarkdownFormatting(text),
+              text: textWithBullet,
+              segments: parseMarkdownFormatting(textWithBullet),
               y: yPosition,
               indent: 0, // No indent - bullets align with regular text
             });
@@ -609,7 +610,7 @@
       }
 
       function createSvgSlide(slideElements, isFirst = false, templatePositions = null, slideType = "slide") {
-        let svgContent = `    <g class="${slideType}"${isFirst ? "" : ""}>\n`;
+        let svgContent = `    <g class="${slideType}${isFirst ? " active" : ""}">\n`;
 
         // Use template positions or fallback to defaults
         const positions = templatePositions || {

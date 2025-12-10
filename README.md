@@ -4,7 +4,8 @@ A HTML/JavaScript page that makes powerpoint-style presentations in SVG file.
 
 This is a Proof of Concept, many many features needed before this is a real product.
 
-[Try it out](svg-presentation-maker.html)
+- [see example](files/presentation-output.svg)
+- [Try it out](svg-presentation-maker.html)
 
 - You need the `presentation-template.svg` and `presentation.md` (download the repo for samples)
 
@@ -20,7 +21,7 @@ This is a Proof of Concept, many many features needed before this is a real prod
 
 - Was made for a presentation about how powerful and flexible SVGs are.
 - Procrastination!
-- File is tiny! [see example](files/presentation-output.svg)
+- File is tiny!
 
 ## Notes
 
