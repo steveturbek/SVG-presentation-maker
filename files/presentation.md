@@ -1,11 +1,10 @@
-<image href="oxygen.svg" x="900" y="500" width="400" height="400"/>
-<image href="turbek.png" x="300" y="500" width="400" height="400"/>
-
 # SVG Presentation Maker
 
 Creating presentations from markdown files
 
 Steve Turbek turbek.com
+
+<image href="oxygen.svg" x="1000" y="500" width="400" height="400"/>
 
 ---
 

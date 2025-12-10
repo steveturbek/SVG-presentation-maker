@@ -158,6 +158,44 @@
       .info-box strong {
         color: #1a365d;
       }
+
+      .preview-container {
+        margin-top: 30px;
+        border: 2px solid #667eea;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f8f9ff;
+      }
+
+      .preview-container iframe {
+        width: 100%;
+        height: 600px;
+        border: none;
+        display: block;
+        background: white;
+      }
+
+      .preview-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .preview-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .preview-actions button {
+        padding: 8px 20px;
+        font-size: 0.9em;
+        margin: 0;
+        width: auto;
+      }
     </style>
   </head>
   <body>
@@ -332,6 +370,9 @@
           } else {
             svgStatus.innerHTML = 'Template: <span style="color: #c53030;">✗ presentation-template.svg not found</span>';
           }
+
+          // Focus the generate button so user can just hit return
+          document.getElementById("generateBtn").focus();
         }
       });
 
@@ -867,24 +908,32 @@
             finalSvg = finalSvg.replace("</svg>", scriptTag + "\n</svg>");
           }
 
-          // Create download
+          // Create blob for download and preview
           const blob = new Blob([finalSvg], { type: "image/svg+xml" });
           const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "presentation.svg";
-          a.click();
-          URL.revokeObjectURL(url);
 
           const imageMessage = inlinedCount > 0 ? `<p>Inlined ${inlinedCount} external SVG image(s).</p>` : "";
 
+          // Show preview with download button
           output.innerHTML = `
                     <div class="output success">
                         <h3>Success!</h3>
-                        <p>Generated ${slides.length} slides. Your presentation has been downloaded as <code>presentation.svg</code></p>
+                        <p>Generated ${slides.length} slides.</p>
                         ${imageMessage}
+                    </div>
+                    <div class="preview-container">
+                        <div class="preview-header">
+                            <span>Preview</span>
+                            <div class="preview-actions">
+                                <button onclick="downloadPresentation()">Download SVG</button>
+                            </div>
                         </div>
+                        <iframe id="previewFrame" src="${url}"></iframe>
+                    </div>
                 `;
+
+          // Store the download URL globally so the download button can access it
+          window.presentationDownloadUrl = url;
         } catch (error) {
           output.innerHTML = `
                     <div class="output error">
@@ -894,6 +943,16 @@
                 `;
         } finally {
           generateBtn.disabled = false;
+        }
+      }
+
+      // Download function for the preview
+      function downloadPresentation() {
+        if (window.presentationDownloadUrl) {
+          const a = document.createElement("a");
+          a.href = window.presentationDownloadUrl;
+          a.download = "presentation.svg";
+          a.click();
         }
       }
 
