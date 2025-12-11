@@ -226,10 +226,13 @@
     </div>
 
     <script type="text/javascript" id="slide-presentation-javascript" style="display: none">
-      const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
-      const svg = document.querySelector("svg");
+      // Wait for DOM to be ready
+      function init() {
+        const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
+        // Get the root SVG element (the document element when SVG is standalone)
+        const svg = document.documentElement.tagName === "svg" ? document.documentElement : document.querySelector("svg");
 
-      if (fullscreenIcons.length > 0 && svg) {
+        if (fullscreenIcons.length > 0 && svg) {
         // Add click handler to each fullscreen icon
         fullscreenIcons.forEach((icon) => {
           icon.addEventListener("click", function (e) {
@@ -312,6 +315,32 @@
             navigateSlides("next");
           }
         });
+
+        // Update cursor based on mouse position
+        svg.addEventListener("mousemove", function (e) {
+          const svgRect = svg.getBoundingClientRect();
+          const clickX = e.clientX - svgRect.left;
+          const svgWidth = svgRect.width;
+          const leftThird = svgWidth / 3;
+          const rightThird = (svgWidth * 2) / 3;
+
+          if (clickX < leftThird) {
+            svg.style.cursor = "w-resize";
+          } else if (clickX > rightThird) {
+            svg.style.cursor = "e-resize";
+          } else {
+            svg.style.cursor = "default";
+          }
+        });
+      }
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        // DOM is already ready
+        init();
       }
     </script>
 
@@ -470,7 +499,7 @@
                   text: cleanedLine,
                   segments: [{ text: cleanedLine, style: "code" }],
                   y: yPosition,
-                  indent: 6,
+                  indent: 2,
                 });
                 yPosition += lineHeight * 0.9; // Slightly tighter spacing for code
               }
@@ -563,7 +592,7 @@
         } else if (segment.style === "italic") {
           fontStyle = ' font-style="italic"';
         } else if (segment.style === "code") {
-          extraClass = ' code';
+          extraClass = " code";
         }
 
         return `<tspan class="${className}${extraClass}" x="${xPos}" dy="${isFirst ? "0" : "0"}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
@@ -607,37 +636,41 @@
             const externalDoc = parser.parseFromString(externalSVGText, "image/svg+xml");
             const externalSVG = externalDoc.documentElement;
 
-            // Create a group element to wrap the external SVG content
-            const group = svgDoc.createElementNS("http://www.w3.org/2000/svg", "g");
+            // Create a nested SVG element to wrap the external SVG content
+            // Using <svg> instead of <g> allows us to use x, y, width, height with percentages
+            const nestedSvg = svgDoc.createElementNS("http://www.w3.org/2000/svg", "svg");
 
             // Copy attributes from image element for positioning
-            const x = parseFloat(img.getAttribute("x") || 0);
-            const y = parseFloat(img.getAttribute("y") || 0);
+            const xAttr = img.getAttribute("x") || "0";
+            const yAttr = img.getAttribute("y") || "0";
             const width = img.getAttribute("width");
             const height = img.getAttribute("height");
 
-            // Apply transform for positioning
-            if (x !== 0 || y !== 0) {
-              group.setAttribute("transform", `translate(${x}, ${y})`);
-            }
+            // Set position and size attributes (supports both px and %)
+            nestedSvg.setAttribute("x", xAttr);
+            nestedSvg.setAttribute("y", yAttr);
+            if (width) nestedSvg.setAttribute("width", width);
+            if (height) nestedSvg.setAttribute("height", height);
 
             // Copy viewBox from external SVG if it exists
             const viewBox = externalSVG.getAttribute("viewBox");
-            if (viewBox && width && height) {
+            if (viewBox) {
+              nestedSvg.setAttribute("viewBox", viewBox);
+              nestedSvg.setAttribute("preserveAspectRatio", externalSVG.getAttribute("preserveAspectRatio") || "xMidYMid meet");
               // Add viewBox info as comment
               const comment = svgDoc.createComment(` Inlined from ${href}, original viewBox: ${viewBox} `);
-              group.appendChild(comment);
+              nestedSvg.appendChild(comment);
             }
 
             // Copy all child elements from external SVG
             const children = Array.from(externalSVG.children);
             children.forEach((child) => {
               const imported = svgDoc.importNode(child, true);
-              group.appendChild(imported);
+              nestedSvg.appendChild(imported);
             });
 
-            // Replace image element with group
-            img.parentNode.replaceChild(group, img);
+            // Replace image element with nested SVG
+            img.parentNode.replaceChild(nestedSvg, img);
 
             console.log(`Successfully inlined: ${href}`);
             inlinedCount++;
@@ -717,14 +750,21 @@
                 const isFirstSegmentOfLine = segIndex === 0;
                 const dy = isFirstSegmentOfLine ? (lineIndex === 0 ? "0" : "1.2em") : "0";
 
-                const escapedText = escapeHtml(seg.text);
+                // Add space after segment text if it's not the last segment and doesn't already end with space
+                let segmentText = seg.text;
+                const isLastSegmentOfLine = segIndex === lineSegments.length - 1;
+                if (!isLastSegmentOfLine && !segmentText.endsWith(" ")) {
+                  segmentText = segmentText + " ";
+                }
+
+                const escapedText = escapeHtml(segmentText);
                 let fontWeight = seg.style === "bold" ? ' font-weight="bold"' : "";
                 let fontStyle = seg.style === "italic" ? ' font-style="italic"' : "";
-                let extraClass = seg.style === "code" ? ' code' : "";
+                let extraClass = seg.style === "code" ? " code" : "";
                 const xAttr = isFirstSegmentOfLine ? xPos : "";
 
                 svgContent += `          <tspan class="${className}${extraClass}" x="${xAttr}" dy="${dy}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
-                if (segIndex === lineSegments.length - 1) svgContent += "\n";
+                if (isLastSegmentOfLine) svgContent += "\n";
               });
             });
             svgContent += `        </text>\n`;
@@ -737,17 +777,19 @@
             // Single line with formatted segments
             svgContent += `        <text x="${xPos}" y="${yPos}">\n`;
             element.segments.forEach((segment, index) => {
-              const tspan = createStyledTspan(segment, className, index === 0 ? xPos : "", index === 0);
+              // Add space after segment text if it's not the last segment and doesn't already end with space
+              let segmentText = segment.text;
+              const isLastSegment = index === element.segments.length - 1;
+              if (!isLastSegment && !segmentText.endsWith(" ")) {
+                segmentText = segmentText + " ";
+              }
+              const modifiedSegment = { ...segment, text: segmentText };
+              const tspan = createStyledTspan(modifiedSegment, className, index === 0 ? xPos : "", index === 0);
               svgContent += `          ${tspan}`;
-              if (index === element.segments.length - 1) svgContent += "\n";
+              if (isLastSegment) svgContent += "\n";
             });
             svgContent += `        </text>\n`;
           }
-        }
-
-        // Add fullscreen icon only to first slide
-        if (isFirst) {
-          svgContent += `<text class="fullscreen-icon" style="cursor: pointer;" x="95%" y="5%" font-size="40" fill="white" text-anchor="middle">⛶</text>\n`;
         }
 
         svgContent += `    </g>\n`;
@@ -879,9 +921,25 @@
           // Parse and add new slides - use SVG namespace
           const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
           tempSvg.innerHTML = allSlides;
-          Array.from(tempSvg.children).forEach((child) => {
+          const slideElements = Array.from(tempSvg.children);
+          slideElements.forEach((child) => {
             slidesGroup.appendChild(child);
           });
+
+          // Add fullscreen icon to the first slide only
+          if (slideElements.length > 0) {
+            const firstSlide = slideElements[0];
+            const fullscreenIcon = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            fullscreenIcon.setAttribute("class", "fullscreen-icon");
+            fullscreenIcon.setAttribute("style", "cursor: pointer;");
+            fullscreenIcon.setAttribute("x", "95%");
+            fullscreenIcon.setAttribute("y", "5%");
+            fullscreenIcon.setAttribute("font-size", "40");
+            fullscreenIcon.setAttribute("fill", "white");
+            fullscreenIcon.setAttribute("text-anchor", "middle");
+            fullscreenIcon.textContent = "⛶";
+            firstSlide.appendChild(fullscreenIcon);
+          }
 
           // Inline external SVG images if folder was provided
           let inlinedCount = 0;
@@ -893,6 +951,10 @@
           // Serialize to string first
           const serializer = new XMLSerializer();
           let finalSvg = serializer.serializeToString(svgDoc);
+
+          // Add style to make text unselectable
+          const styleTag = "<style>\n  text { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }\n</style>\n";
+          finalSvg = finalSvg.replace("</svg>", styleTag + "</svg>");
 
           // Add the interactive script to the SVG as a string (to avoid escaping issues)
           const scriptElement = document.getElementById("slide-presentation-javascript");
@@ -925,7 +987,7 @@
                         <div class="preview-header">
                             <span>Preview</span>
                             <div class="preview-actions">
-                                <button onclick="downloadPresentation()">Download SVG</button>
+                                <button id="downloadBtn" onclick="downloadPresentation()">Download SVG</button>
                             </div>
                         </div>
                         <iframe id="previewFrame" src="${url}"></iframe>
@@ -934,6 +996,11 @@
 
           // Store the download URL globally so the download button can access it
           window.presentationDownloadUrl = url;
+
+          // Focus the download button
+          setTimeout(() => {
+            document.getElementById("downloadBtn")?.focus();
+          }, 100);
         } catch (error) {
           output.innerHTML = `
                     <div class="output error">
