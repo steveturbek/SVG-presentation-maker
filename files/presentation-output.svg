@@ -190,7 +190,6 @@ text{
     }, 50);  //end of setInterval code.  50 is 50 milliseconds or 20 times per second.
 
   ]]></script></g>
-        <image href="turbek.png" x="300" y="500" width="400" height="400"/>
         <text x="2%" y="13%">
           <tspan class="heading" x="2%" dy="0">SVG Presentation Maker</tspan>
         </text>
