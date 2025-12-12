@@ -265,7 +265,7 @@
 
       // Helper function to navigate slides
       function navigateSlides(direction) {
-        const slides = document.querySelectorAll(".slides > .slide, .slides > .title");
+        const slides = document.querySelectorAll(".slides > .basicSlide, .slides > .titleSlide");
 
         // Find currently visible slide
         let currentIndex = -1;
@@ -470,14 +470,14 @@
         const elements = [];
         let yPosition = 20;
         const lineHeight = 10;
-        let slideType = "slide"; // default to "slide"
+        let slideType = "basicSlide"; // default to "basicSlide"
         let inCodeBlock = false;
         let codeBlockLines = [];
 
         // Check if this is a title slide (starts with # but not ##)
         const firstLine = lines[0]?.trim();
         if (firstLine && firstLine.startsWith("# ") && !firstLine.startsWith("## ")) {
-          slideType = "title";
+          slideType = "titleSlide";
         }
 
         for (let i = 0; i < lines.length; i++) {
@@ -829,8 +829,8 @@
           const templateDoc = templateParser.parseFromString(svgTemplate, "image/svg+xml");
 
           // Extract positioning for both title and slide types
-          const titleSlide = templateDoc.querySelector("g.slides > g.title");
-          const contentSlide = templateDoc.querySelector("g.slides > g.slide");
+          const titleSlide = templateDoc.querySelector("g.slides > g.titleSlide");
+          const contentSlide = templateDoc.querySelector("g.slides > g.basicSlide");
 
           // Default positions
           let titlePositions = {
@@ -901,7 +901,7 @@
           let allSlides = "";
           slides.forEach((slideText, index) => {
             const { elements, slideType } = parseMarkdownSlide(slideText);
-            const positions = slideType === "title" ? titlePositions : slidePositions;
+            const positions = slideType === "titleSlide" ? titlePositions : slidePositions;
             allSlides += createSvgSlide(elements, index === 0, positions, slideType);
           });
 

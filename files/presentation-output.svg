@@ -2,16 +2,26 @@
 <defs>
     <style>
 
-.slide, .title, .slide-bg{
+.basicSlide, .titleSlide, .slide-bg{
     width: 100%;
     height: 100%;
 }
-.slide, .title{
+.basicSlide, .titleSlide{
     display: none;
 }
 
-.slides &gt; g:first-of-type{
+.basicSlide.active, .titleSlide.active{
     display: block;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 
@@ -20,11 +30,20 @@ text{
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 
-.heading{
+.titleSlide .heading{
     font-size: 7vh;
 }
 
-.subtext{
+.titleSlide .subtext{
+    font-size: 4vh;
+}
+
+
+.basicSlide .heading{
+    font-size: 7vh;
+}
+
+.basicSlide .subtext{
     font-size: 4vh;
 }
 
@@ -41,8 +60,17 @@ text{
     <rect class="slide-bg" fill="#d4d6cb" x="0" y="0" width="100%" height="100%"/>
 
 
-<g class="slides"><g class="slide">
-        <g transform="translate(900, 500)"><!-- Inlined from oxygen.svg, original viewBox: 0 0 400 400 --><title id="title">Oxygen Gauge (VU style, corrected)</title><desc id="desc">Square retro VU-style oxygen gauge with functional needle pivoting around fixed point.</desc><defs>
+<g class="slides"><g class="titleSlide active">
+        <text x="2%" y="40%">
+          <tspan class="heading" x="2%" dy="0">SVG Presentation Maker</tspan>
+        </text>
+        <text x="2%" y="50%">
+          <tspan class="subtext" x="2%" dy="0">Creating presentations from markdown files</tspan>
+        </text>
+        <text x="2%" y="60%">
+          <tspan class="subtext" x="2%" dy="0">Steve Turbek turbek.com</tspan>
+        </text>
+        <svg x="1000" y="500" width="400" height="400" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"><!-- Inlined from oxygen.svg, original viewBox: 0 0 400 400 --><title id="title">Oxygen Gauge (VU style, corrected)</title><desc id="desc">Square retro VU-style oxygen gauge with functional needle pivoting around fixed point.</desc><defs>
     <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f7f1e3"/>
       <stop offset="100%" stop-color="#e9dfc8"/>
@@ -189,261 +217,19 @@ text{
 
     }, 50);  //end of setInterval code.  50 is 50 milliseconds or 20 times per second.
 
-  ]]></script></g>
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">SVG Presentation Maker</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">Creating presentations from markdown files</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0">Steve Turbek turbek.com</tspan>
-        </text>
-<text class="fullscreen-icon" style="cursor: pointer;" x="95%" y="5%" font-size="40" fill="white" text-anchor="middle">⛶</text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">What Is This Tool?</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">The SVG Presentation Maker converts markdown files into</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">interactive SVG-based presentations that run directly in</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">your browser.</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0">No complex setup. No dependencies. Just markdown and SVGs.</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Key Features</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Markdown-based slides</tspan>          <tspan class="subtext" x="" dy="0"> - Write your presentation in</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">simple markdown</tspan>
-        </text>
-        <text x="3%" y="45%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">SVG graphics support</tspan>          <tspan class="subtext" x="" dy="0"> - Embed and display SVG images in</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">your slides</tspan>
-        </text>
-        <text x="3%" y="60%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Browser-based</tspan>          <tspan class="subtext" x="" dy="0"> - Runs entirely in the browser, no</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">installation needed</tspan>
-        </text>
-        <text x="3%" y="75%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Keyboard navigation</tspan>          <tspan class="subtext" x="" dy="0"> - Arrow keys to move between slides</tspan>
-        </text>
-        <text x="3%" y="85%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Lightweight</tspan>          <tspan class="subtext" x="" dy="0"> - Minimal code, fast loading</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">How It Works</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">1. Write your presentation in markdown</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0">2. Use </tspan>          <tspan class="subtext code" x="" dy="0">---</tspan>          <tspan class="subtext" x="" dy="0"> to separate slides</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0">3. Reference SVG files with the image syntax</tspan>
-        </text>
-        <text x="3%" y="60%">
-          <tspan class="subtext" x="3%" dy="0">4. Open in browser and present!</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Markdown Slide Format</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">Each slide is separated by </tspan>          <tspan class="subtext code" x="" dy="0">---</tspan>          <tspan class="subtext" x="" dy="0"> (three dashes)</tspan>
-        </text>
-        <text x="9%" y="40%">
-          <tspan class="subtext code" x="9%" dy="0"># Slide Title</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0">Content goes here</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Adding Images</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">Use the standard image tag to include SVG graphics:</tspan>
-        </text>
-        <text x="9%" y="40%">
-          <tspan class="subtext code" x="9%" dy="0">&lt;image href="your-file.svg" x="0" y="0" width="400" height="400"/&gt;</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0">Position and size your images with x, y, width, and height</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">attributes</tspan>
-        </text>
-        <text x="3%" y="65%">
-          <tspan class="subtext" x="3%" dy="0">SVG files will be integrated, PNG and JPG files will be</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">referenced.</tspan>
-        </text>
-        <text x="3%" y="80%">
-          <tspan class="subtext" x="3%" dy="0">File must be in the folder path in the image tag in</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">presentation.md</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Backgrounds</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">Backgrounds are images</tspan>
-        </text>
-        <text x="9%" y="40%">
-          <tspan class="subtext code" x="9%" dy="0">&lt;image href="your-file.svg" x="0" y="0" width="100%" height="100%"/&gt;</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Navigation</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Right Arrow</tspan>          <tspan class="subtext" x="" dy="0"> / </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Space</tspan>          <tspan class="subtext" x="" dy="0"> - Next slide</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Left Arrow</tspan>          <tspan class="subtext" x="" dy="0"> - Previous slide</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Home</tspan>          <tspan class="subtext" x="" dy="0"> - First slide</tspan>
-        </text>
-        <text x="3%" y="60%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">End</tspan>          <tspan class="subtext" x="" dy="0"> - Last slide</tspan>
-        </text>
-        <text x="3%" y="70%">
-          <tspan class="subtext" x="3%" dy="0">Simple keyboard controls for smooth presentations</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">File Structure</tspan>
-        </text>
-        <text x="9%" y="30%">
-          <tspan class="subtext code" x="9%" dy="0">/files</tspan>
-        </text>
-        <text x="9%" y="40%">
-          <tspan class="subtext code" x="9%" dy="0">├── presentation.md    (your markdown content)</tspan>
-        </text>
-        <text x="9%" y="50%">
-          <tspan class="subtext code" x="9%" dy="0">├── image1.svg        (SVG graphics)</tspan>
-        </text>
-        <text x="9%" y="60%">
-          <tspan class="subtext code" x="9%" dy="0">├── image2.svg</tspan>
-        </text>
-        <text x="9%" y="70%">
-          <tspan class="subtext code" x="9%" dy="0">└── ...</tspan>
-        </text>
-        <text x="3%" y="80%">
-          <tspan class="subtext" x="3%" dy="0">Keep your markdown and SVG files in the files directory</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Why SVG Presentations?</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Infinite scalability</tspan>          <tspan class="subtext" x="" dy="0"> - SVG graphics never pixelate</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Small file sizes</tspan>          <tspan class="subtext" x="" dy="0"> - Vector graphics are compact</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Interactive potential</tspan>          <tspan class="subtext" x="" dy="0"> - SVGs can include animations and</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">interactivity</tspan>
-        </text>
-        <text x="3%" y="65%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Portable</tspan>          <tspan class="subtext" x="" dy="0"> - Single HTML file can contain everything</tspan>
-        </text>
-        <text x="3%" y="75%">
-          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Designer-friendly</tspan>          <tspan class="subtext" x="" dy="0"> - Create graphics in Figma or</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">Illustrator</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Getting Started</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">1. Edit </tspan>          <tspan class="subtext code" x="" dy="0">presentation.md</tspan>          <tspan class="subtext" x="" dy="0"> with your content</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0">2. Add any SVG graphics to the </tspan>          <tspan class="subtext code" x="" dy="0">files</tspan>          <tspan class="subtext" x="" dy="0"> directory</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0">3. Open </tspan>          <tspan class="subtext code" x="" dy="0">index.html</tspan>          <tspan class="subtext" x="" dy="0"> in your browser</tspan>
-        </text>
-        <text x="3%" y="60%">
-          <tspan class="subtext" x="3%" dy="0">4. Start presenting!</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Customization</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">The tool is designed to be simple and hackable:</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0">Modify styles in the HTML file</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0">Adjust slide transitions</tspan>
-        </text>
-        <text x="3%" y="60%">
-          <tspan class="subtext" x="3%" dy="0">Add custom JavaScript for interactivity</tspan>
-        </text>
-        <text x="3%" y="70%">
-          <tspan class="subtext" x="3%" dy="0">Integrate with the SVG AI Helper workflow</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Perfect For</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">Quick presentations and demos</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0">Design portfolios showcasing SVG work</tspan>
-        </text>
-        <text x="3%" y="50%">
-          <tspan class="subtext" x="3%" dy="0">Teaching and workshops</tspan>
-        </text>
-        <text x="3%" y="60%">
-          <tspan class="subtext" x="3%" dy="0">Technical talks with code examples</tspan>
-        </text>
-        <text x="3%" y="70%">
-          <tspan class="subtext" x="3%" dy="0">Any presentation where you want full control</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Open Source</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">This tool is open source and free to use.</tspan>
-        </text>
-        <text x="3%" y="40%">
-          <tspan class="subtext" x="3%" dy="0">Modify it, extend it, make it your own.</tspan>
-        </text>
-    </g><g class="slide">
-        <text x="2%" y="13%">
-          <tspan class="heading" x="2%" dy="0">Questions?</tspan>
-        </text>
-        <text x="3%" y="30%">
-          <tspan class="subtext" x="3%" dy="0">Start by editing this file (</tspan>          <tspan class="subtext code" x="" dy="0">presentation.md</tspan>          <tspan class="subtext" x="" dy="0">) with your own</tspan>
-          <tspan class="subtext" x="3%" dy="1.2em">content.</tspan>
-        </text>
-        <text x="3%" y="45%">
-          <tspan class="subtext" x="3%" dy="0">Experiment with different layouts and SVG graphics.</tspan>
-        </text>
-        <text x="3%" y="55%">
-          <tspan class="subtext" x="3%" dy="0">Have fun presenting!</tspan>
-        </text>
-    </g></g>
-
+  ]]></script><style>
+  text { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+</style>
 <script type="text/javascript">
 <![CDATA[
 (function() {
-const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
-      const svg = document.querySelector("svg");
+// Wait for DOM to be ready
+      function init() {
+        const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
+        // Get the root SVG element (the document element when SVG is standalone)
+        const svg = document.documentElement.tagName === "svg" ? document.documentElement : document.querySelector("svg");
 
-      if (fullscreenIcons.length > 0 && svg) {
+        if (fullscreenIcons.length > 0 && svg) {
         // Add click handler to each fullscreen icon
         fullscreenIcons.forEach((icon) => {
           icon.addEventListener("click", function (e) {
@@ -476,12 +262,12 @@ const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
 
       // Helper function to navigate slides
       function navigateSlides(direction) {
-        const slides = document.querySelectorAll(".slides > .slide, .slides > .title");
+        const slides = document.querySelectorAll(".slides > .basicSlide, .slides > .titleSlide");
 
-        // Find currently visible slide by checking computed style
+        // Find currently visible slide
         let currentIndex = -1;
         for (let i = 0; i < slides.length; i++) {
-          if (window.getComputedStyle(slides[i]).display === "block") {
+          if (slides[i].classList.contains("active")) {
             currentIndex = i;
             break;
           }
@@ -497,8 +283,8 @@ const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
 
         // Switch slides if index changed
         if (nextIndex !== currentIndex && nextIndex >= 0) {
-          slides[currentIndex].style.display = "none";
-          slides[nextIndex].style.display = "block";
+          slides[currentIndex].classList.remove("active");
+          slides[nextIndex].classList.add("active");
         }
       }
 
@@ -526,8 +312,246 @@ const fullscreenIcons = document.querySelectorAll(".fullscreen-icon");
             navigateSlides("next");
           }
         });
+
+        // Update cursor based on mouse position
+        svg.addEventListener("mousemove", function (e) {
+          const svgRect = svg.getBoundingClientRect();
+          const clickX = e.clientX - svgRect.left;
+          const svgWidth = svgRect.width;
+          const leftThird = svgWidth / 3;
+          const rightThird = (svgWidth * 2) / 3;
+
+          if (clickX < leftThird) {
+            svg.style.cursor = "w-resize";
+          } else if (clickX > rightThird) {
+            svg.style.cursor = "e-resize";
+          } else {
+            svg.style.cursor = "default";
+          }
+        });
+      }
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        // DOM is already ready
+        init();
       }
 })();
 ]]>
 </script>
+</svg>
+    <text class="fullscreen-icon" style="cursor: pointer;" x="95%" y="5%" font-size="40" fill="white" text-anchor="middle">⛶</text></g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">What Is This Tool?</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">The SVG Presentation Maker converts markdown files into</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">interactive SVG-based presentations that run directly in</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">your browser.</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">No complex setup. No dependencies. Just markdown and SVGs.</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Key Features</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0" font-weight="bold">Markdown-based slides </tspan>          <tspan class="subtext" x="" dy="0"> - Write your presentation in</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">simple markdown</tspan>
+        </text>
+        <text x="3%" y="45%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">SVG graphics support </tspan>          <tspan class="subtext" x="" dy="0"> - Embed and display SVG images in</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">your slides</tspan>
+        </text>
+        <text x="3%" y="60%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Browser-based </tspan>          <tspan class="subtext" x="" dy="0"> - Runs entirely in the browser, no</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">installation needed</tspan>
+        </text>
+        <text x="3%" y="75%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Keyboard navigation </tspan>          <tspan class="subtext" x="" dy="0"> - Arrow keys to move between</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">slides</tspan>
+        </text>
+        <text x="3%" y="90%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Lightweight </tspan>          <tspan class="subtext" x="" dy="0"> - Minimal code, fast loading</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">How It Works</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">1. Write your presentation in markdown</tspan>
+        </text>
+        <text x="3%" y="40%">
+          <tspan class="subtext" x="3%" dy="0">2. Use </tspan>          <tspan class="subtext code" x="" dy="0">--- </tspan>          <tspan class="subtext" x="" dy="0"> to separate slides</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">3. Reference SVG files with the image syntax</tspan>
+        </text>
+        <text x="3%" y="60%">
+          <tspan class="subtext" x="3%" dy="0">4. Open in browser and present!</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Markdown Slide Format</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">Each slide is separated by </tspan>          <tspan class="subtext code" x="" dy="0">--- </tspan>          <tspan class="subtext" x="" dy="0"> (three dashes)</tspan>
+        </text>
+        <text x="5%" y="40%">
+          <tspan class="subtext code" x="5%" dy="0"># Slide Title</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">Content goes here</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Adding Images</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">Use the standard image tag to include SVG graphics:</tspan>
+        </text>
+        <text x="5%" y="40%">
+          <tspan class="subtext code" x="5%" dy="0">&lt;image href="image.svg" x="0" y="0" width="400" height="400"/&gt;</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">• Position and size your images with x, y, width, and height</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">attributes</tspan>
+        </text>
+        <text x="3%" y="65%">
+          <tspan class="subtext" x="3%" dy="0">• SVG files will be integrated, PNG and JPG files will be</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">referenced.</tspan>
+        </text>
+        <text x="3%" y="80%">
+          <tspan class="subtext" x="3%" dy="0">• File must be in the folder path in the image tag in</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">presentation.md</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Backgrounds</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">Backgrounds are images</tspan>
+        </text>
+        <text x="5%" y="40%">
+          <tspan class="subtext code" x="5%" dy="0">&lt;image href="BG.svg" x="0" y="0" width="100%" height="100%"/&gt;</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Navigation</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Right Arrow </tspan>          <tspan class="subtext" x="" dy="0"> / </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Space </tspan>          <tspan class="subtext" x="" dy="0"> - Next slide</tspan>
+        </text>
+        <text x="3%" y="40%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Left Arrow </tspan>          <tspan class="subtext" x="" dy="0"> - Previous slide</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Home </tspan>          <tspan class="subtext" x="" dy="0"> - First slide</tspan>
+        </text>
+        <text x="3%" y="60%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">End </tspan>          <tspan class="subtext" x="" dy="0"> - Last slide</tspan>
+        </text>
+        <text x="3%" y="70%">
+          <tspan class="subtext" x="3%" dy="0">Simple keyboard controls for smooth presentations</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">File Structure</tspan>
+        </text>
+        <text x="5%" y="30%">
+          <tspan class="subtext code" x="5%" dy="0">/files</tspan>
+        </text>
+        <text x="5%" y="40%">
+          <tspan class="subtext code" x="5%" dy="0">├── presentation.md    (your markdown content)</tspan>
+        </text>
+        <text x="5%" y="50%">
+          <tspan class="subtext code" x="5%" dy="0">├── image1.svg        (SVG graphics)</tspan>
+        </text>
+        <text x="5%" y="60%">
+          <tspan class="subtext code" x="5%" dy="0">├── image2.svg</tspan>
+        </text>
+        <text x="5%" y="70%">
+          <tspan class="subtext code" x="5%" dy="0">└── ...</tspan>
+        </text>
+        <text x="3%" y="80%">
+          <tspan class="subtext" x="3%" dy="0">Keep your markdown and SVG files in the files directory</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Why SVG Presentations?</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Infinite scalability </tspan>          <tspan class="subtext" x="" dy="0"> - SVG graphics never pixelate</tspan>
+        </text>
+        <text x="3%" y="40%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Small file sizes </tspan>          <tspan class="subtext" x="" dy="0"> - Vector graphics are compact</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Interactive potential </tspan>          <tspan class="subtext" x="" dy="0"> - SVGs can include animations</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">and interactivity</tspan>
+        </text>
+        <text x="3%" y="65%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Portable </tspan>          <tspan class="subtext" x="" dy="0"> - Single SVG file can contain text and SVGs</tspan>
+        </text>
+        <text x="3%" y="75%">
+          <tspan class="subtext" x="3%" dy="0">• </tspan>          <tspan class="subtext" x="" dy="0" font-weight="bold">Designer-friendly </tspan>          <tspan class="subtext" x="" dy="0"> - Create graphics in Figma or</tspan>
+          <tspan class="subtext" x="3%" dy="1.2em">Illustrator</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Getting Started</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">1. Edit </tspan>          <tspan class="subtext code" x="" dy="0">presentation.md </tspan>          <tspan class="subtext" x="" dy="0"> with your content</tspan>
+        </text>
+        <text x="3%" y="40%">
+          <tspan class="subtext" x="3%" dy="0">2. Add any SVG graphics to the </tspan>          <tspan class="subtext code" x="" dy="0">files </tspan>          <tspan class="subtext" x="" dy="0"> directory</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">3. Experiment with different layouts and SVG graphics.</tspan>
+        </text>
+        <text x="3%" y="60%">
+          <tspan class="subtext" x="3%" dy="0">4. Use the tool to generate your </tspan>          <tspan class="subtext code" x="" dy="0">presentation.svg</tspan>
+        </text>
+        <text x="3%" y="70%">
+          <tspan class="subtext" x="3%" dy="0">5. Open in your browser</tspan>
+        </text>
+        <text x="3%" y="80%">
+          <tspan class="subtext" x="3%" dy="0">6. Present!</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Perfect For</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">• Quick presentations and demos</tspan>
+        </text>
+        <text x="3%" y="40%">
+          <tspan class="subtext" x="3%" dy="0">• Design portfolios showcasing SVG work</tspan>
+        </text>
+        <text x="3%" y="50%">
+          <tspan class="subtext" x="3%" dy="0">• Teaching and workshops</tspan>
+        </text>
+        <text x="3%" y="60%">
+          <tspan class="subtext" x="3%" dy="0">• Technical talks with code examples</tspan>
+        </text>
+        <text x="3%" y="70%">
+          <tspan class="subtext" x="3%" dy="0">• Any presentation where you want full control</tspan>
+        </text>
+    </g><g class="basicSlide">
+        <text x="2%" y="13%">
+          <tspan class="heading" x="2%" dy="0">Open Source</tspan>
+        </text>
+        <text x="3%" y="30%">
+          <tspan class="subtext" x="3%" dy="0">This tool is open source and free to use.</tspan>
+        </text>
+        <text x="3%" y="40%">
+          <tspan class="subtext" x="3%" dy="0">Modify it, extend it, make it your own.</tspan>
+        </text>
+    </g></g>
+
 </svg>
