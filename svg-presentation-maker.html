@@ -473,6 +473,7 @@
         let slideType = "basicSlide"; // default to "basicSlide"
         let inCodeBlock = false;
         let codeBlockLines = [];
+        let slideBackground = null;
 
         // Check if this is a title slide (starts with # but not ##)
         const firstLine = lines[0]?.trim();
@@ -482,6 +483,13 @@
 
         for (let i = 0; i < lines.length; i++) {
           let line = lines[i].trim();
+
+          // Check for slide background comment: <!-- slide-bg=#color --> or <!-- slide-bg=url(#gradientId) -->
+          const bgMatch = line.match(/<!--\s*slide-bg\s*=\s*([^-]+?)\s*-->/);
+          if (bgMatch) {
+            slideBackground = bgMatch[1].trim();
+            continue; // Skip this line, don't render the comment
+          }
 
           // Handle code block markers
           if (line.startsWith("```")) {
@@ -578,7 +586,7 @@
           }
         }
 
-        return { elements, slideType };
+        return { elements, slideType, slideBackground };
       }
 
       function createStyledTspan(segment, className, xPos, isFirst = false) {
@@ -872,8 +880,13 @@
         return inlinedCount;
       }
 
-      function createSvgSlide(slideElements, isFirst = false, templatePositions = null, slideType = "slide") {
+      function createSvgSlide(slideElements, isFirst = false, templatePositions = null, slideType = "slide", slideBackground = null) {
         let svgContent = `    <g class="${slideType}${isFirst ? " active" : ""}">\n`;
+
+        // Add background rect if specified
+        if (slideBackground) {
+          svgContent += `        <rect class="slide-bg" fill="${slideBackground}" x="0" y="0" width="100%" height="100%" />\n`;
+        }
 
         // Use template positions or fallback to defaults
         const positions = templatePositions || {
@@ -1089,9 +1102,9 @@
           // Generate SVG slides using template positions
           let allSlides = "";
           slides.forEach((slideText, index) => {
-            const { elements, slideType } = parseMarkdownSlide(slideText);
+            const { elements, slideType, slideBackground } = parseMarkdownSlide(slideText);
             const positions = slideType === "titleSlide" ? titlePositions : slidePositions;
-            allSlides += createSvgSlide(elements, index === 0, positions, slideType);
+            allSlides += createSvgSlide(elements, index === 0, positions, slideType, slideBackground);
           });
 
           // Find the <g class="slides"> section and replace its contents

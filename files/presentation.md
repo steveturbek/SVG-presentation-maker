@@ -8,6 +8,8 @@ Steve Turbek turbek.com
 
 ---
 
+<!-- slide-bg=lightblue -->
+
 ## What Is This Tool?
 
 The SVG Presentation Maker converts markdown files into interactive SVG-based presentations that run directly in your browser.
@@ -64,9 +66,16 @@ Use the standard image tag to include SVG graphics:
 
 ## Backgrounds
 
-Backgrounds are images
+Set slide backgrounds using simple comments:
 
 ```
+<!-- slide-bg=#2d3748 -->
+```
+
+You can use solid colors, gradients, or SVG images:
+
+```
+<!-- slide-bg=url(#myGradient) -->
 <image href="BG.svg" x="0" y="0" width="100%" height="100%"/>
 ```
 
