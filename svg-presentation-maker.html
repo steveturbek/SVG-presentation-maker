@@ -598,6 +598,188 @@
         return `<tspan class="${className}${extraClass}" x="${xPos}" dy="${isFirst ? "0" : "0"}"${fontWeight}${fontStyle}>${escapedText}</tspan>`;
       }
 
+      // Generate a random alphanumeric string
+      function generateRandomString(length = 6) {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+          result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+      }
+
+      // Create a unique suffix from filename and random string
+      function createUniqueSuffix(filename) {
+        // Extract filename without extension and make it safe for CSS
+        const nameWithoutExt = filename.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-]/g, '-');
+        const randomPart = generateRandomString(6);
+        return `${nameWithoutExt}-${randomPart}`;
+      }
+
+      // Namespace all identifiers in an SVG element to prevent conflicts
+      function namespaceSVG(svgElement, suffix) {
+        const svgDoc = svgElement.ownerDocument;
+
+        // Track all original IDs, classes, and animations and their namespaced versions
+        const idMap = new Map();
+        const classMap = new Map();
+        const animationMap = new Map();
+
+        // Step 1: Find and rename all IDs
+        const elementsWithId = svgElement.querySelectorAll('[id]');
+        elementsWithId.forEach(el => {
+          const oldId = el.getAttribute('id');
+          const newId = `${oldId}-${suffix}`;
+          idMap.set(oldId, newId);
+          el.setAttribute('id', newId);
+        });
+
+        // Step 2: Update all references to IDs
+        // Handle url(#id), href="#id", xlink:href="#id"
+        const allElements = svgElement.querySelectorAll('*');
+        allElements.forEach(el => {
+          // Check all attributes for url(#id) patterns
+          Array.from(el.attributes).forEach(attr => {
+            let value = attr.value;
+            let modified = false;
+
+            // Handle url(#id) in CSS properties
+            value = value.replace(/url\(#([^)]+)\)/g, (match, id) => {
+              if (idMap.has(id)) {
+                modified = true;
+                return `url(#${idMap.get(id)})`;
+              }
+              return match;
+            });
+
+            // Handle #id in href and xlink:href
+            if ((attr.name === 'href' || attr.name === 'xlink:href') && value.startsWith('#')) {
+              const id = value.substring(1);
+              if (idMap.has(id)) {
+                value = `#${idMap.get(id)}`;
+                modified = true;
+              }
+            }
+
+            if (modified) {
+              attr.value = value;
+            }
+          });
+        });
+
+        // Step 3: Process style elements to namespace classes, animations, and CSS variables
+        const styleElements = svgElement.querySelectorAll('style');
+        styleElements.forEach(styleEl => {
+          let css = styleEl.textContent;
+
+          // Find all class selectors and namespace them
+          css = css.replace(/\.([a-zA-Z_][\w-]*)/g, (match, className) => {
+            const newClassName = `${className}-${suffix}`;
+            classMap.set(className, newClassName);
+            return `.${newClassName}`;
+          });
+
+          // Find all ID selectors and namespace them
+          css = css.replace(/#([a-zA-Z_][\w-]*)/g, (match, idName) => {
+            // Check if this ID exists in our idMap
+            if (idMap.has(idName)) {
+              return `#${idMap.get(idName)}`;
+            }
+            return match;
+          });
+
+          // Find and namespace @keyframes animations
+          css = css.replace(/@keyframes\s+([a-zA-Z_][\w-]*)/g, (match, animName) => {
+            const newAnimName = `${animName}-${suffix}`;
+            animationMap.set(animName, newAnimName);
+            return `@keyframes ${newAnimName}`;
+          });
+
+          // Update animation references in animation: and animation-name: properties
+          animationMap.forEach((newName, oldName) => {
+            // Match animation or animation-name property with the old name
+            const regex = new RegExp(`(animation(?:-name)?\\s*:\\s*)${oldName}\\b`, 'g');
+            css = css.replace(regex, `$1${newName}`);
+          });
+
+          // Namespace CSS variables (--variable-name)
+          const cssVarMap = new Map();
+          css = css.replace(/--([a-zA-Z_][\w-]*)/g, (match, varName) => {
+            const newVarName = `--${varName}-${suffix}`;
+            cssVarMap.set(`--${varName}`, newVarName);
+            return newVarName;
+          });
+
+          // Update url(#id) references in CSS to use namespaced IDs
+          css = css.replace(/url\(#([^)]+)\)/g, (match, id) => {
+            if (idMap.has(id)) {
+              return `url(#${idMap.get(id)})`;
+            }
+            return match;
+          });
+
+          styleEl.textContent = css;
+        });
+
+        // Step 4: Update class attributes on elements
+        const elementsWithClass = svgElement.querySelectorAll('[class]');
+        elementsWithClass.forEach(el => {
+          const classes = el.getAttribute('class').split(/\s+/);
+          const newClasses = classes.map(cls => classMap.get(cls) || cls);
+          el.setAttribute('class', newClasses.join(' '));
+        });
+
+        // Step 5: Update inline style attributes that reference CSS variables
+        allElements.forEach(el => {
+          if (el.hasAttribute('style')) {
+            let styleValue = el.getAttribute('style');
+            // Update var(--variable) references
+            styleValue = styleValue.replace(/var\(--([^)]+)\)/g, (match, varName) => {
+              return `var(--${varName}-${suffix})`;
+            });
+            el.setAttribute('style', styleValue);
+          }
+        });
+
+        // Step 6: Update JavaScript code in <script> elements
+        const scriptElements = svgElement.querySelectorAll('script');
+        scriptElements.forEach(scriptEl => {
+          let jsCode = scriptEl.textContent;
+
+          // Update getElementById and querySelector calls with IDs from idMap
+          idMap.forEach((newId, oldId) => {
+            // Match getElementById('oldId') or getElementById("oldId")
+            const getByIdRegex1 = new RegExp(`getElementById\\s*\\(\\s*['"]${oldId}['"]\\s*\\)`, 'g');
+            jsCode = jsCode.replace(getByIdRegex1, `getElementById('${newId}')`);
+
+            // Match querySelector('#oldId') or querySelector("#oldId")
+            const querySelectorRegex1 = new RegExp(`querySelector\\s*\\(\\s*['"]#${oldId}['"]\\s*\\)`, 'g');
+            jsCode = jsCode.replace(querySelectorRegex1, `querySelector('#${newId}')`);
+
+            // Match querySelectorAll('#oldId') or querySelectorAll("#oldId")
+            const querySelectorAllRegex = new RegExp(`querySelectorAll\\s*\\(\\s*['"]#${oldId}['"]\\s*\\)`, 'g');
+            jsCode = jsCode.replace(querySelectorAllRegex, `querySelectorAll('#${newId}')`);
+          });
+
+          // Update class references in querySelector/querySelectorAll
+          classMap.forEach((newClass, oldClass) => {
+            // Match querySelector('.oldClass') or querySelector(".oldClass")
+            const querySelectorRegex = new RegExp(`querySelector\\s*\\(\\s*['"]\\.${oldClass}['"]\\s*\\)`, 'g');
+            jsCode = jsCode.replace(querySelectorRegex, `querySelector('.${newClass}')`);
+
+            // Match querySelectorAll('.oldClass') or querySelectorAll(".oldClass")
+            const querySelectorAllRegex = new RegExp(`querySelectorAll\\s*\\(\\s*['"]\\.${oldClass}['"]\\s*\\)`, 'g');
+            jsCode = jsCode.replace(querySelectorAllRegex, `querySelectorAll('.${newClass}')`);
+
+            // Match getElementsByClassName('oldClass') or getElementsByClassName("oldClass")
+            const getByClassRegex = new RegExp(`getElementsByClassName\\s*\\(\\s*['"]${oldClass}['"]\\s*\\)`, 'g');
+            jsCode = jsCode.replace(getByClassRegex, `getElementsByClassName('${newClass}')`);
+          });
+
+          scriptEl.textContent = jsCode;
+        });
+      }
+
       // Function to inline external SVG images
       async function inlineExternalImages(svgDoc) {
         const parser = new DOMParser();
@@ -636,6 +818,13 @@
             const externalDoc = parser.parseFromString(externalSVGText, "image/svg+xml");
             const externalSVG = externalDoc.documentElement;
 
+            // Generate a unique suffix for this SVG to prevent naming conflicts
+            const fileName = normalizedPath.split('/').pop();
+            const uniqueSuffix = createUniqueSuffix(fileName);
+
+            // Namespace all identifiers in the external SVG
+            namespaceSVG(externalSVG, uniqueSuffix);
+
             // Create a nested SVG element to wrap the external SVG content
             // Using <svg> instead of <g> allows us to use x, y, width, height with percentages
             const nestedSvg = svgDoc.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -672,7 +861,7 @@
             // Replace image element with nested SVG
             img.parentNode.replaceChild(nestedSvg, img);
 
-            console.log(`Successfully inlined: ${href}`);
+            console.log(`Successfully inlined: ${href} (namespaced as: ${uniqueSuffix})`);
             inlinedCount++;
           } catch (err) {
             console.error(`Error inlining ${href}:`, err);
